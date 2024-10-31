@@ -141,6 +141,7 @@ local function focusOnNPC(npc)
 				move:Deactivate()
 				task.wait(.15)
 				move.Parent = Player.Backpack
+	task.wait(.05)
 			end
 		end
 
