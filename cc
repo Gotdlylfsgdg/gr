@@ -139,7 +139,7 @@ local function focusOnNPC(npc)
 				move.Parent = Player.Character
 				move:Activate()
 				move:Deactivate()
-				task.wait(.25)
+				task.wait(.31)
 				move.Parent = Player.Backpack
 			end
 		end
