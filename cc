@@ -138,10 +138,11 @@ local function focusOnNPC(npc)
 			if table.find(KiMoves, move.Name) then
 				move.Parent = Player.Character
 				move:Activate()
+	task.wait()
 				move:Deactivate()
-				task.wait(.2)
+				task.wait(.05)
 				move.Parent = Player.Backpack
-	task.wait(.08)
+	task.wait(.14)
 			end
 		end
 
