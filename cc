@@ -3,6 +3,7 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local Player = Players.LocalPlayer
+
 -- Ki move spam settings
 local KiMoves = {"Blaster Meteor", "Chain Destructo Disk"}
 local Trackables = {"KiBlast", "Blast"}
@@ -12,11 +13,10 @@ local eligibleNPCs = {}  -- Table to dynamically track eligible NPCs
 
 -- Function to check if an NPC is eligible
 local function isEligibleNPC(npc)
-	-- Exclude Prum and ensure the NPC has Damagers and a Humanoid
 	return npc.Name ~= "Prum" and 
-		npc:FindFirstChild("Damagers") and 
-		npc:FindFirstChildOfClass("Humanoid") and
-		npc:FindFirstChildOfClass("Humanoid").Health > 0
+		   npc:FindFirstChild("Damagers") and 
+		   npc:FindFirstChildOfClass("Humanoid") and
+		   npc:FindFirstChildOfClass("Humanoid").Health > 0
 end
 
 -- Function to update eligible NPCs
@@ -32,7 +32,7 @@ end
 
 -- Connect to ChildAdded event to dynamically update NPCs
 workspace.Live.ChildAdded:Connect(function(child)
-	task.wait(0.1)  -- Small delay to ensure full initialization
+	task.wait(0.1)
 	if isEligibleNPC(child) then
 		table.insert(eligibleNPCs, child)
 		print("Added new NPC: " .. child.Name)
@@ -55,9 +55,7 @@ updateEligibleNPCs()
 
 -- Function to get the closest NPC with "Damagers"
 local function getClosestNPCWithDamagers()
-	-- Refresh the list to ensure we have the most current NPCs
 	updateEligibleNPCs()
-
 	if #eligibleNPCs == 0 then
 		return nil
 	end
@@ -86,14 +84,12 @@ end
 
 -- Function to update Ki positions
 local function updateKiPositions(targetPosition)
-	-- Update position of trackable Ki items in workspace
 	for _, v in pairs(workspace:GetChildren()) do
 		if table.find(Trackables, v.Name) then
 			v.Position = targetPosition
 		end
 	end
 
-	-- Update Ki-related objects in character
 	if Player.Character then
 		for _, v in pairs(Player.Character:GetChildren()) do
 			if v:FindFirstChild("Ki") and v:FindFirstChild("Mesh") then
@@ -114,6 +110,11 @@ local function focusOnNPC(npc)
 	-- Create a separate connection for constant position updates
 	local updateConnection
 	updateConnection = RunService.Heartbeat:Connect(function()
+		if not running then
+			updateConnection:Disconnect()
+			return
+		end
+
 		local humanoidRootPart = npc:FindFirstChild("HumanoidRootPart")
 		if humanoidRootPart and humanoid.Health > 0 then
 			updateKiPositions(humanoidRootPart.Position)
@@ -123,7 +124,7 @@ local function focusOnNPC(npc)
 	end)
 
 	-- Continuously check if the HumanoidRootPart is valid
-	while humanoid.Health > 0 do
+	while running and humanoid.Health > 0 do
 		local humanoidRootPart = npc:FindFirstChild("HumanoidRootPart")
 		if not humanoidRootPart then
 			print(npc.Name .. " does not have a HumanoidRootPart.")
@@ -133,6 +134,7 @@ local function focusOnNPC(npc)
 
 		-- Spam Ki moves
 		for _, move in pairs(Player.Backpack:GetChildren()) do
+			if not running then break end
 			if table.find(KiMoves, move.Name) then
 				move.Parent = Player.Character
 				move:Activate()
@@ -146,7 +148,9 @@ local function focusOnNPC(npc)
 	end
 
 	updateConnection:Disconnect()
-	print(npc.Name .. " has been defeated!")
+	if running then
+		print(npc.Name .. " has been defeated!")
+	end
 	return true
 end
 
@@ -156,6 +160,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		running = not running
 		if not running then
 			print("Script stopped.")
+			targetNPC = nil  -- Reset target when script stops
 		else
 			print("Script resumed.")
 		end
