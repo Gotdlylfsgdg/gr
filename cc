@@ -14,9 +14,9 @@ local eligibleNPCs = {}  -- Table to dynamically track eligible NPCs
 -- Function to check if an NPC is eligible
 local function isEligibleNPC(npc)
 	return npc.Name ~= "Prum" and 
-		   npc:FindFirstChild("Damagers") and 
-		   npc:FindFirstChildOfClass("Humanoid") and
-		   npc:FindFirstChildOfClass("Humanoid").Health > 0
+		npc:FindFirstChild("Damagers") and 
+		npc:FindFirstChildOfClass("Humanoid") and
+		npc:FindFirstChildOfClass("Humanoid").Health > 0
 end
 
 -- Function to update eligible NPCs
@@ -134,21 +134,14 @@ local function focusOnNPC(npc)
 
 		-- Spam Ki moves
 		for _, move in pairs(Player.Backpack:GetChildren()) do
-			if not running then break end  -- Ensure it stops if 'running' is toggled off
+			if not running then break end
 			if table.find(KiMoves, move.Name) then
 				move.Parent = Player.Character
 				move:Activate()
-	task.wait()
 				move:Deactivate()
-				task.wait(.05)
+				task.wait(.2)
 				move.Parent = Player.Backpack
-	task.wait(.14)
 			end
-		end
-
-		if not running then
-			updateConnection:Disconnect()
-			break  -- Ensure the loop exits if 'running' becomes false
 		end
 
 		RunService.RenderStepped:Wait()
